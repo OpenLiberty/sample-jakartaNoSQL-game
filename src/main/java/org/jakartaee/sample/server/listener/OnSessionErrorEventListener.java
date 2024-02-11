@@ -14,12 +14,8 @@ public class OnSessionErrorEventListener {
 
     private static final Logger LOG = Logger.getLogger(OnSessionErrorEventListener.class.getName());
 
-    private GameSessions gameSessions;
-
     @Inject
-    public OnSessionErrorEventListener(GameSessions gameSessions) {
-        this.gameSessions = gameSessions;
-    }
+    GameSessions gameSessions;
 
     void process(@Observes OnSessionErrorEvent event) {
         LOG.log(Level.SEVERE, "onError", event.throwable());

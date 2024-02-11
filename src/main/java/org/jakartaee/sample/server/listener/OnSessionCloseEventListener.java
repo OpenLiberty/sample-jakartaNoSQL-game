@@ -9,12 +9,8 @@ import org.jakartaee.sample.server.event.OnSessionCloseEvent;
 @ApplicationScoped
 public class OnSessionCloseEventListener {
 
-    private GameSessions gameSessions;
-
     @Inject
-    public OnSessionCloseEventListener(GameSessions gameSessions) {
-        this.gameSessions = gameSessions;
-    }
+    GameSessions gameSessions;
 
     void process(@Observes OnSessionCloseEvent event) {
         gameSessions.unregister(event.session());

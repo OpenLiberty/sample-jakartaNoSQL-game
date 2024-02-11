@@ -12,12 +12,8 @@ import static java.util.Objects.isNull;
 @ApplicationScoped
 public class OnSessionMessageEventListener {
 
-    private GameSessions gameSessions;
-
     @Inject
-    public OnSessionMessageEventListener(GameSessions gameSessions) {
-        this.gameSessions = gameSessions;
-    }
+    GameSessions gameSessions;
 
     void onSessionMessage(@Observes OnSessionMessageEvent event) {
         var message = Message.fromJson(event.rawMessage());

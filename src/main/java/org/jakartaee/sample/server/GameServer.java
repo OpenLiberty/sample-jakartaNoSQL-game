@@ -27,16 +27,11 @@ public class GameServer {
 
     private static final Logger LOGGER = Logger.getLogger(GameServer.class.getName());
 
-    private Event<GameServerEvent> event;
-
     @Inject
-    public GameServer(Event<GameServerEvent> event) {
-        this.event = event;
-    }
+    Event<GameServerEvent> event;
 
     @OnOpen
-    public void onOpen(Session session, @PathParam("playerName") String playerName)
-    {
+    public void onOpen(Session session, @PathParam("playerName") String playerName) {
         LOGGER.log(Level.INFO, "Create new session with %s".formatted(playerName));
         event.fire(new OnSessionOpenEvent(session, URLDecoder.decode(playerName, StandardCharsets.UTF_8)));
     }
