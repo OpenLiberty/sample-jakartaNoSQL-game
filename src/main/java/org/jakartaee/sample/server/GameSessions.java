@@ -77,7 +77,6 @@ public class GameSessions {
         send(session, CONNECTED.build());
     }
 
-
     public void unregister(Session session) {
 
         synchronized (this) {
