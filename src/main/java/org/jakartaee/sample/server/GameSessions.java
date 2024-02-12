@@ -1,9 +1,11 @@
 package org.jakartaee.sample.server;
 
+import jakarta.annotation.PostConstruct;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.websocket.Session;
 import org.jakartaee.sample.game.Game;
 import org.jakartaee.sample.game.GameAbandoned;
+import org.jakartaee.sample.game.GameEvent;
 import org.jakartaee.sample.game.GameInvalid;
 import org.jakartaee.sample.game.GameOver;
 import org.jakartaee.sample.game.GamePlayers;
@@ -45,6 +47,11 @@ public class GameSessions {
     private final Map<String, Player> playersBySessionId = new HashMap<>();
     private final Game game = new Game();
 
+    @PostConstruct
+    void postConstruct() {
+        game.addListener(this::onGameEvent);
+    }
+
     private Optional<Player> getPlayerBySession(Session session) {
         return getPlayerBySessionId(session.getId());
     }
@@ -82,83 +89,73 @@ public class GameSessions {
 
     private void leaveGame(Optional<Player> playerRef, Session session) {
         playerRef
-                .ifPresent(player -> {
-                    GameState gameState = game.leaveGame(player);
-                    if (gameState instanceof GameInvalid gameInvalid) {
-                        send(session, GAME_INVALID.build(m ->
-                                m.set(gameId, gameInvalid.gameId())));
-                    }
-                    if (gameState instanceof GameAbandoned gameAbandoned) {
-                        GamePlayers.of(gameAbandoned.players())
-                                .getOpponent(player)
-                                .flatMap(opponent -> getSessionById(opponent.id()))
-                                .ifPresent(opponentSession -> send(opponentSession, player, gameAbandoned));
-                    }
-                });
+                .ifPresent(game::leaveGame);
     }
 
     public void playerWantsNewGame(Message message, Session session) {
         getPlayerBySession(session)
-                .ifPresent(player -> {
-
-                    GameState gameState = game.newGame(player);
-
-                    if (gameState instanceof WaitingPlayers waitingPlayers) {
-                        send(session, waitingPlayers);
-                    }
-
-                    if (gameState instanceof GameReady gameReady) {
-                        Stream.of(gameReady.playerA().id(), gameReady.playerB().id())
-                                .map(this::getSessionById)
-                                .filter(Optional::isPresent)
-                                .map(Optional::get)
-                                .forEach(playerSession -> send(playerSession, gameReady));
-                    }
-                });
+                .ifPresent(game::newGame);
     }
 
     public void playerWantsToPlay(Message message, Session session) {
         getPlayerBySession(session)
-                .ifPresent(player -> {
+                .ifPresent(player -> movement.get(message)
+                        .map(Movement::valueOf)
+                        .ifPresent(playerMovement -> game.playGame(player, playerMovement)));
+    }
 
-                    GameState gameState = movement.get(message)
-                            .map(Movement::valueOf)
-                            .map(playerMovement -> game.playGame(player, playerMovement))
-                            .orElseThrow();
+    private void onGameEvent(GameEvent event) {
 
-                    if (gameState instanceof GameInvalid gameInvalid) {
-                        send(session, gameInvalid);
-                    }
+        var gameState = event.gameState();
 
-                    if (gameState instanceof GameReady gameReady) {
-                        Stream.of(gameReady.playerA().id(), gameReady.playerB().id())
-                                .map(this::getSessionById)
-                                .filter(Optional::isPresent)
-                                .map(Optional::get)
-                                .forEach(playerSession -> send(playerSession, gameReady));
-                    }
+        if (gameState instanceof GameInvalid gameInvalid
+                && event.source() instanceof Player player) {
+            getSessionById(player.id())
+                    .ifPresent(session -> send(session,gameInvalid));
+        }
 
-                    if (gameState instanceof GameRunning gameRunning) {
-                        Stream.of(gameRunning.playerA().id(), gameRunning.playerB().id())
-                                .map(this::getSessionById)
-                                .filter(Optional::isPresent)
-                                .map(Optional::get)
-                                .forEach(playerSession -> send(playerSession, gameRunning));
-                    }
+        if (gameState instanceof WaitingPlayers waitingPlayers) {
+            getSessionById(waitingPlayers.player().id())
+                    .ifPresent(session -> send(session, waitingPlayers));
+        }
 
-                    if (gameState instanceof GameOver gameOver && gameOver.isTied()) {
-                        sendTiedGame(gameOver);
-                    }
+        if (gameState instanceof GameReady gameReady) {
+            Stream.of(gameReady.playerA().id(), gameReady.playerB().id())
+                    .map(this::getSessionById)
+                    .filter(Optional::isPresent)
+                    .map(Optional::get)
+                    .forEach(playerSession -> send(playerSession, gameReady));
+        }
 
-                    if (gameState instanceof GameOver gameOver && !gameOver.isTied()) {
+        if (gameState instanceof GameRunning gameRunning) {
+            Stream.of(gameRunning.playerA().id(), gameRunning.playerB().id())
+                    .map(this::getSessionById)
+                    .filter(Optional::isPresent)
+                    .map(Optional::get)
+                    .forEach(playerSession -> send(playerSession, gameRunning));
+        }
 
-                        Stream.of(gameOver.playerA().id(), gameOver.playerB().id())
-                                .map(this::getSessionById)
-                                .filter(Optional::isPresent)
-                                .map(Optional::get)
-                                .forEach(playerSession -> send(playerSession, gameOver));
-                    }
-                });
+        if (gameState instanceof GameOver gameOver && gameOver.isTied()) {
+            sendTiedGame(gameOver);
+        }
+
+        if (gameState instanceof GameOver gameOver && !gameOver.isTied()) {
+
+            Stream.of(gameOver.playerA().id(), gameOver.playerB().id())
+                    .map(this::getSessionById)
+                    .filter(Optional::isPresent)
+                    .map(Optional::get)
+                    .forEach(playerSession -> send(playerSession, gameOver));
+        }
+
+        if (gameState instanceof GameAbandoned gameAbandoned
+                && event.source() instanceof Player player) {
+            GamePlayers.of(gameAbandoned.players())
+                    .getOpponent(player)
+                    .flatMap(opponent -> getSessionById(opponent.id()))
+                    .ifPresent(opponentSession -> send(opponentSession, player, gameAbandoned));
+        }
+
     }
 
     private void send(Session session, WaitingPlayers waitingPlayers) {
