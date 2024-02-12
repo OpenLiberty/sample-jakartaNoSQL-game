@@ -576,7 +576,7 @@
                         tryPanel.show();
                         socket.close()
                     }
-                    if ("GAME_RUNNING" === msg.type) {
+                    if ("GAME_READY" === msg.type) {
                         updateOpponentName(msg.data.opponentName)
                         updateOpponentImages('NONE')
                         state.gameId = msg.data.gameId
@@ -586,7 +586,7 @@
                         const interval = setInterval(() => {
                             progressBar.decrease(20);
                         }, 1000);
-                        setTimeout(() => {
+                        const timeout = setTimeout(() => {
                             clearInterval(interval);
                             boardMovement.disable();
                             const n={
@@ -596,7 +596,8 @@
                                     movement: state.movement
                                 }
                             };
-                            sendMessage(n)
+                            sendMessage(n);
+                            clearTimeout(timeout);
                         }, 5000)
                     }
                 };

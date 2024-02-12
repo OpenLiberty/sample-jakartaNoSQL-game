@@ -51,8 +51,8 @@ class GameTest {
             softly.assertThat(gameStateForPlayer2)
                     .as("the returned game state should be non-null")
                     .isNotNull()
-                    .as("the returned game state should be " + GameRunning.class.getSimpleName())
-                    .isInstanceOf(GameRunning.class)
+                    .as("the returned game state should be " + GameReady.class.getSimpleName())
+                    .isInstanceOf(GameReady.class)
                     .as("the returned game state should be equals to the same returned from the latest newGame(player) call")
                     .isEqualTo(game.newGame(player2));
         });

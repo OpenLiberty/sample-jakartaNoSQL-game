@@ -38,6 +38,9 @@ public record GamePlayers(Set<Player> players) {
         if (gameState instanceof WaitingPlayers waitingPlayers) {
             return GamePlayers.of(Set.of(waitingPlayers.player()));
         }
+        if (gameState instanceof GameReady gameReady) {
+            return GamePlayers.of(gameReady.players());
+        }
         if (gameState instanceof GameRunning gameRunning) {
             return GamePlayers.of(gameRunning.players());
         }

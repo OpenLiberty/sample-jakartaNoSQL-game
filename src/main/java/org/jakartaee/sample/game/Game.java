@@ -44,7 +44,7 @@ public class Game {
                 }
                 var gameId = getGameId(playerWaiting);
                 registerPlayerOnTheGame(player, gameId);
-                return publishAndReturn(updateGameState(new GameRunning(gameId, playerWaiting, player, null, null)));
+                return publishAndReturn(updateGameState(new GameReady(gameId, playerWaiting, player)));
             }
             return actualGameState;
         }
@@ -79,6 +79,9 @@ public class Game {
                 return currentState;
             }
             var newState = games.computeIfPresent(currentState.gameId(), (key, oldState) -> {
+                if (oldState instanceof GameReady gameReady && GamePlayers.of(gameReady.players()).isPart(player)) {
+                    return publishAndReturn(play(gameReady, player, movement));
+                }
                 if (oldState instanceof GameRunning gameRunning && GamePlayers.of(gameRunning.players()).isPart(player)) {
                     return publishAndReturn(play(gameRunning, player, movement));
                 }
@@ -104,17 +107,43 @@ public class Game {
         }
     }
 
+    private GameState play(GameReady gameReady, Player player, Movement movement) {
+        var isPlayerA = Objects.equals(gameReady.playerA(), player);
+        var isPlayerB = Objects.equals(gameReady.playerB(), player);
+        if (!isPlayerA && !isPlayerB) {
+            return new GameInvalid(gameReady.gameId());
+        }
+        return new GameRunning(gameReady.gameId(),
+                gameReady.playerA(),
+                gameReady.playerB(),
+                isPlayerA ? movement : null,
+                isPlayerB ? movement : null);
+    }
+
     private GameState play(GameRunning gameRunning, Player player, Movement movement) {
         var isPlayerA = Objects.equals(gameRunning.playerA(), player);
         var isPlayerB = Objects.equals(gameRunning.playerB(), player);
         if (!isPlayerA && !isPlayerB) {
             return new GameInvalid(gameRunning.gameId());
         }
-        var opponentMovement = isPlayerA ? gameRunning.playerBMovement() : gameRunning.playerAMovement();
-        if (opponentMovement == null) {
-            return new GameRunning(gameRunning.gameId(), gameRunning.playerA(), gameRunning.playerB(), isPlayerA ? movement : null, isPlayerB ? movement : null);
+
+        var missingOpponentMovement = isPlayerA ?
+                gameRunning.playerBMovement() == null
+                : gameRunning.playerAMovement() == null;
+
+        if (missingOpponentMovement) {
+            return new GameRunning(gameRunning.gameId(),
+                    gameRunning.playerA(),
+                    gameRunning.playerB(),
+                    isPlayerA ? movement : null,
+                    isPlayerB ? movement : null);
         }
-        return new GameOver(gameRunning.gameId(), gameRunning.playerA(), gameRunning.playerB(), isPlayerA ? movement : gameRunning.playerAMovement(), isPlayerB ? movement : gameRunning.playerBMovement());
+
+        return new GameOver(gameRunning.gameId(),
+                gameRunning.playerA(),
+                gameRunning.playerB(),
+                isPlayerA ? movement : gameRunning.playerAMovement(),
+                isPlayerB ? movement : gameRunning.playerBMovement());
     }
 
 

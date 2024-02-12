@@ -1,5 +1,6 @@
 package org.jakartaee.sample.server;
 
+import jakarta.annotation.PostConstruct;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.websocket.Session;
 import org.jakartaee.sample.game.Game;
@@ -7,6 +8,7 @@ import org.jakartaee.sample.game.GameAbandoned;
 import org.jakartaee.sample.game.GameInvalid;
 import org.jakartaee.sample.game.GameOver;
 import org.jakartaee.sample.game.GamePlayers;
+import org.jakartaee.sample.game.GameReady;
 import org.jakartaee.sample.game.GameRunning;
 import org.jakartaee.sample.game.GameState;
 import org.jakartaee.sample.game.Movement;
@@ -16,6 +18,7 @@ import org.jakartaee.sample.server.message.Message;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -31,6 +34,7 @@ import static org.jakartaee.sample.server.message.MessageType.GAME_OVER_ABANDONE
 import static org.jakartaee.sample.server.message.MessageType.GAME_OVER_DRAW;
 import static org.jakartaee.sample.server.message.MessageType.GAME_OVER_YOU_LOSE;
 import static org.jakartaee.sample.server.message.MessageType.GAME_OVER_YOU_WIN;
+import static org.jakartaee.sample.server.message.MessageType.GAME_READY;
 import static org.jakartaee.sample.server.message.MessageType.GAME_RUNNING;
 import static org.jakartaee.sample.server.message.MessageType.WAITING_PLAYERS;
 
@@ -39,10 +43,29 @@ public class GameSessions {
 
     private static final Logger LOG = Logger.getLogger(GameSessions.class.getName());
 
-    private Map<String, Session> sessionsById = new HashMap<>();
-    private Map<String, Player> playersBySessionId = new HashMap<>();
+    private final Map<String, Session> sessionsById = new HashMap<>();
+    private final Map<String, Player> playersBySessionId = new HashMap<>();
     private final Game game = new Game();
 
+    @PostConstruct
+    void postConstruct() {
+        game.addListener(this::onGameStateUpdate);
+    }
+
+    private void onGameStateUpdate(GameState gameState) {
+        if (gameState instanceof WaitingPlayers waitingPlayers) {
+
+        }
+        if (gameState instanceof GameRunning gameRunning) {
+
+        }
+        if (gameState instanceof GameOver gameOver) {
+
+        }
+        if (gameState instanceof GameAbandoned gameAbandoned) {
+
+        }
+    }
 
     private Optional<Player> getPlayerBySession(Session session) {
         return getPlayerBySessionId(session.getId());
@@ -86,14 +109,12 @@ public class GameSessions {
                     if (gameState instanceof GameInvalid gameInvalid) {
                         send(session, GAME_INVALID.build(m ->
                                 m.set(gameId, gameInvalid.gameId())));
-                        return;
                     }
                     if (gameState instanceof GameAbandoned gameAbandoned) {
-                        gameAbandoned.players().stream()
-                                .filter(opponent -> !player.equals(opponent))
-                                .forEach(opponent -> getSessionById(opponent.id())
-                                        .ifPresent(opponentSession -> send(opponentSession, player, gameAbandoned)));
-                        return;
+                        GamePlayers.of(gameAbandoned.players())
+                                .getOpponent(player)
+                                .flatMap(opponent -> getSessionById(opponent.id()))
+                                .ifPresent(opponentSession -> send(opponentSession, player, gameAbandoned));
                     }
                 });
     }
@@ -108,12 +129,12 @@ public class GameSessions {
                         send(session, waitingPlayers);
                     }
 
-                    if (gameState instanceof GameRunning gameRunning) {
-                        Stream.of(gameRunning.playerA().id(), gameRunning.playerB().id())
+                    if (gameState instanceof GameReady gameReady) {
+                        Stream.of(gameReady.playerA().id(), gameReady.playerB().id())
                                 .map(this::getSessionById)
                                 .filter(Optional::isPresent)
                                 .map(Optional::get)
-                                .forEach(playerSession -> send(playerSession, gameRunning));
+                                .forEach(playerSession -> send(playerSession, gameReady));
                     }
                 });
     }
@@ -129,6 +150,14 @@ public class GameSessions {
 
                     if (gameState instanceof GameInvalid gameInvalid) {
                         send(session, gameInvalid);
+                    }
+
+                    if (gameState instanceof GameReady gameReady) {
+                        Stream.of(gameReady.playerA().id(), gameReady.playerB().id())
+                                .map(this::getSessionById)
+                                .filter(Optional::isPresent)
+                                .map(Optional::get)
+                                .forEach(playerSession -> send(playerSession, gameReady));
                     }
 
                     if (gameState instanceof GameRunning gameRunning) {
@@ -157,6 +186,20 @@ public class GameSessions {
     private void send(Session session, WaitingPlayers waitingPlayers) {
         Message message = WAITING_PLAYERS.build(m -> m.set(gameId, waitingPlayers.gameId()));
         send(session, message);
+    }
+
+    private void send(Session session, GameReady gameReady) {
+        getPlayerBySession(session)
+                .ifPresent(player -> {
+                    GamePlayers gamePlayers = GamePlayers.of(gameReady);
+                    gamePlayers.getOpponent(player)
+                            .ifPresent(opponent -> {
+                                Message message = GAME_READY
+                                        .build(s -> s.set(gameId, gameReady.gameId())
+                                                .set(opponentName, opponent.name()));
+                                send(session, message);
+                            });
+                });
     }
 
     private void send(Session session, GameRunning gameRunning) {

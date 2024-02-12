@@ -56,7 +56,7 @@ class GameEventListenerTest {
                     .isNotEmpty()
                     .containsExactly(
                             new WaitingPlayers(gameId, player1),
-                            new GameRunning(gameId, player1, player2, null, null),
+                            new GameReady(gameId, player1, player2),
                             new GameRunning(gameId, player1, player2, ROCK, null),
                             new GameOver(gameId, player1, player2, ROCK, PAPER)
                     );
@@ -102,7 +102,7 @@ class GameEventListenerTest {
                     .isNotEmpty()
                     .containsExactly(
                             new WaitingPlayers(gameId, player2),
-                            new GameRunning(gameId, player2, player1, null, null),
+                            new GameReady(gameId, player2, player1),
                             new GameRunning(gameId, player2, player1, null, PAPER),
                             new GameOver(gameId, player2, player1, ROCK, PAPER)
                     );
@@ -117,7 +117,7 @@ class GameEventListenerTest {
                     .isNotEmpty()
                     .containsExactly(
                             new WaitingPlayers(gameId, player1),
-                            new GameRunning(gameId, player1, player2, null, null),
+                            new GameReady(gameId, player1, player2),
                             new GameAbandoned(gameId, Set.of(player1, player2))
                     );
 
@@ -132,7 +132,7 @@ class GameEventListenerTest {
                     .isNotEmpty()
                     .containsExactly(
                             new WaitingPlayers(gameId, player1),
-                            new GameRunning(gameId, player1, player2, null, null),
+                            new GameReady(gameId, player1, player2),
                             new GameRunning(gameId, player1, player2, null, ROCK),
                             new GameAbandoned(gameId, Set.of(player1, player2))
                     );
@@ -165,7 +165,7 @@ class GameEventListenerTest {
                     .as("events captured by listener1 should be follow an specific order")
                     .containsExactly(
                             new WaitingPlayers(gameId, player1),
-                            new GameRunning(gameId, player1, player2, null, null),
+                            new GameReady(gameId, player1, player2),
                             new GameRunning(gameId, player1, player2, ROCK, null),
                             new GameOver(gameId, player1, player2, ROCK, PAPER)
                     );
@@ -176,7 +176,7 @@ class GameEventListenerTest {
                     .as("events captured by listener2 should be follow an specific order")
                     .containsExactly(
                             new WaitingPlayers(gameId, player1),
-                            new GameRunning(gameId, player1, player2, null, null),
+                            new GameReady(gameId, player1, player2),
                             new GameRunning(gameId, player1, player2, ROCK, null),
                             new GameOver(gameId, player1, player2, ROCK, PAPER)
                     );
@@ -191,7 +191,9 @@ class GameEventListenerTest {
             List<GameState> eventsCapturedByListener1 = new ArrayList<>();
 
             Consumer<GameState> listener1 = eventsCapturedByListener1::add;
-            Consumer<GameState> listener2 = gameState -> {throw new UnsupportedOperationException("cannot accept events!");};
+            Consumer<GameState> listener2 = gameState -> {
+                throw new UnsupportedOperationException("cannot accept events!");
+            };
 
             game.addListener(listener1).addListener(listener2);
 
@@ -206,7 +208,7 @@ class GameEventListenerTest {
                     .as("events captured by listener1 should be follow an specific order")
                     .containsExactly(
                             new WaitingPlayers(gameId, player1),
-                            new GameRunning(gameId, player1, player2, null, null),
+                            new GameReady(gameId, player1, player2),
                             new GameRunning(gameId, player1, player2, ROCK, null),
                             new GameOver(gameId, player1, player2, ROCK, PAPER)
                     );

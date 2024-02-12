@@ -90,6 +90,10 @@ class GamePlayersTest {
                     .as("GamePlayers should be able to be created based on a " + WaitingPlayers.class.getSimpleName() + " object")
                     .isNotNull();
 
+            softly.assertThat(GamePlayers.of(new GameReady(UUID.randomUUID().toString(), player1, player2)))
+                    .as("GamePlayers should be able to be created based on a " + GameReady.class.getSimpleName() + " object")
+                    .isNotNull();
+
             softly.assertThat(GamePlayers.of(new GameRunning(UUID.randomUUID().toString(), player1, player2, null, null)))
                     .as("GamePlayers should be able to be created based on a " + GameRunning.class.getSimpleName() + " object")
                     .isNotNull();
@@ -192,6 +196,18 @@ class GamePlayersTest {
                     .isNotEmpty()
                     .as("GamePlayers players based on a " + WaitingPlayers.class.getSimpleName() + " object should contains the player1")
                     .contains(player1);
+
+            GamePlayers fromGameReady = GamePlayers.of(new GameReady(UUID.randomUUID().toString(), player1, player2));
+
+            softly.assertThat(fromGameReady)
+                    .as("GamePlayers should be able to be created based on a " + GameReady.class.getSimpleName() + " object")
+                    .isNotNull();
+
+            softly.assertThat(fromGameReady.players())
+                    .as("GamePlayers players based on a " + GameReady.class.getSimpleName() + " object should be not empty")
+                    .isNotEmpty()
+                    .as("GamePlayers players based on a " + GameReady.class.getSimpleName() + " object should contains the player1 and player2")
+                    .contains(player1, player2);
 
             GamePlayers fromGameRunning = GamePlayers.of(new GameRunning(UUID.randomUUID().toString(), player1, player2, null, null));
 
