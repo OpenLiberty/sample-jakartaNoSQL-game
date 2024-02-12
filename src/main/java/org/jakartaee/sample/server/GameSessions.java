@@ -47,26 +47,6 @@ public class GameSessions {
     private final Map<String, Player> playersBySessionId = new HashMap<>();
     private final Game game = new Game();
 
-    @PostConstruct
-    void postConstruct() {
-        game.addListener(this::onGameStateUpdate);
-    }
-
-    private void onGameStateUpdate(GameState gameState) {
-        if (gameState instanceof WaitingPlayers waitingPlayers) {
-
-        }
-        if (gameState instanceof GameRunning gameRunning) {
-
-        }
-        if (gameState instanceof GameOver gameOver) {
-
-        }
-        if (gameState instanceof GameAbandoned gameAbandoned) {
-
-        }
-    }
-
     private Optional<Player> getPlayerBySession(Session session) {
         return getPlayerBySessionId(session.getId());
     }
