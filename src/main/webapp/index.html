@@ -493,8 +493,10 @@
 
                 const sendMessage = (message)=>{
                     let data = JSON.stringify(message);
-                    console.log("Sending: " + data);
-                    socket.send(data)
+                    if(connected) {
+                        console.log("Sending: " + data);
+                        socket.send(data)
+                    }
                 }
                 socket.onmessage = function (m) {
                     console.log("Got message: " + m.data);
