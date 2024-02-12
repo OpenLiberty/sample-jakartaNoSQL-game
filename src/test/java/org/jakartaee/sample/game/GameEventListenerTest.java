@@ -31,8 +31,8 @@ class GameEventListenerTest {
 
         assertSoftly(softly -> {
 
-            List<GameState> events = new ArrayList<>();
-            Consumer<GameState> listener = events::add;
+            List<GameEvent> events = new ArrayList<>();
+            Consumer<GameEvent> listener = events::add;
 
             softly.assertThat(game.addListener(null))
                     .as("should return the same game instance on adding a listener")
@@ -55,10 +55,10 @@ class GameEventListenerTest {
                     .as("events should be not empty")
                     .isNotEmpty()
                     .containsExactly(
-                            new WaitingPlayers(gameId, player1),
-                            new GameReady(gameId, player1, player2),
-                            new GameRunning(gameId, player1, player2, ROCK, null),
-                            new GameOver(gameId, player1, player2, ROCK, PAPER)
+                            new GameEvent(player1, new WaitingPlayers(gameId, player1)),
+                            new GameEvent(player2, new GameReady(gameId, player1, player2)),
+                            new GameEvent(player1, new GameRunning(gameId, player1, player2, ROCK, null)),
+                            new GameEvent(player2, new GameOver(gameId, player1, player2, ROCK, PAPER))
                     );
 
             events.clear();
@@ -101,10 +101,10 @@ class GameEventListenerTest {
                     .as("events should be not empty")
                     .isNotEmpty()
                     .containsExactly(
-                            new WaitingPlayers(gameId, player2),
-                            new GameReady(gameId, player2, player1),
-                            new GameRunning(gameId, player2, player1, null, PAPER),
-                            new GameOver(gameId, player2, player1, ROCK, PAPER)
+                            new GameEvent(player2, new WaitingPlayers(gameId, player2)),
+                            new GameEvent(player1, new GameReady(gameId, player2, player1)),
+                            new GameEvent(player1, new GameRunning(gameId, player2, player1, null, PAPER)),
+                            new GameEvent(player2, new GameOver(gameId, player2, player1, ROCK, PAPER))
                     );
 
             events.clear();
@@ -116,9 +116,9 @@ class GameEventListenerTest {
                     .as("events should be not empty")
                     .isNotEmpty()
                     .containsExactly(
-                            new WaitingPlayers(gameId, player1),
-                            new GameReady(gameId, player1, player2),
-                            new GameAbandoned(gameId, Set.of(player1, player2))
+                            new GameEvent(player1, new WaitingPlayers(gameId, player1)),
+                            new GameEvent(player2, new GameReady(gameId, player1, player2)),
+                            new GameEvent(player1, new GameAbandoned(gameId, Set.of(player1, player2)))
                     );
 
             events.clear();
@@ -131,10 +131,10 @@ class GameEventListenerTest {
                     .as("events should be not empty")
                     .isNotEmpty()
                     .containsExactly(
-                            new WaitingPlayers(gameId, player1),
-                            new GameReady(gameId, player1, player2),
-                            new GameRunning(gameId, player1, player2, null, ROCK),
-                            new GameAbandoned(gameId, Set.of(player1, player2))
+                            new GameEvent(player1, new WaitingPlayers(gameId, player1)),
+                            new GameEvent(player2, new GameReady(gameId, player1, player2)),
+                            new GameEvent(player2, new GameRunning(gameId, player1, player2, null, ROCK)),
+                            new GameEvent(player1, new GameAbandoned(gameId, Set.of(player1, player2)))
                     );
         });
 
@@ -146,11 +146,11 @@ class GameEventListenerTest {
     void shouldCaptureEventsByMultipleListeners() {
         assertSoftly(softly -> {
 
-            List<GameState> eventsCapturedByListener1 = new ArrayList<>();
-            List<GameState> eventsCapturedByListener2 = new ArrayList<>();
+            List<GameEvent> eventsCapturedByListener1 = new ArrayList<>();
+            List<GameEvent> eventsCapturedByListener2 = new ArrayList<>();
 
-            Consumer<GameState> listener1 = eventsCapturedByListener1::add;
-            Consumer<GameState> listener2 = eventsCapturedByListener2::add;
+            Consumer<GameEvent> listener1 = eventsCapturedByListener1::add;
+            Consumer<GameEvent> listener2 = eventsCapturedByListener2::add;
 
             game.addListener(listener1).addListener(listener2);
 
@@ -164,10 +164,10 @@ class GameEventListenerTest {
                     .isNotEmpty()
                     .as("events captured by listener1 should be follow an specific order")
                     .containsExactly(
-                            new WaitingPlayers(gameId, player1),
-                            new GameReady(gameId, player1, player2),
-                            new GameRunning(gameId, player1, player2, ROCK, null),
-                            new GameOver(gameId, player1, player2, ROCK, PAPER)
+                            new GameEvent(player1, new WaitingPlayers(gameId, player1)),
+                            new GameEvent(player2, new GameReady(gameId, player1, player2)),
+                            new GameEvent(player1, new GameRunning(gameId, player1, player2, ROCK, null)),
+                            new GameEvent(player2, new GameOver(gameId, player1, player2, ROCK, PAPER))
                     );
 
             softly.assertThat(eventsCapturedByListener2)
@@ -175,10 +175,10 @@ class GameEventListenerTest {
                     .isNotEmpty()
                     .as("events captured by listener2 should be follow an specific order")
                     .containsExactly(
-                            new WaitingPlayers(gameId, player1),
-                            new GameReady(gameId, player1, player2),
-                            new GameRunning(gameId, player1, player2, ROCK, null),
-                            new GameOver(gameId, player1, player2, ROCK, PAPER)
+                            new GameEvent(player1, new WaitingPlayers(gameId, player1)),
+                            new GameEvent(player2, new GameReady(gameId, player1, player2)),
+                            new GameEvent(player1, new GameRunning(gameId, player1, player2, ROCK, null)),
+                            new GameEvent(player2, new GameOver(gameId, player1, player2, ROCK, PAPER))
                     );
 
         });
@@ -188,10 +188,10 @@ class GameEventListenerTest {
     void shouldCaptureEventsByOneOfTheListeners() {
         assertSoftly(softly -> {
 
-            List<GameState> eventsCapturedByListener1 = new ArrayList<>();
+            List<GameEvent> eventsCapturedByListener1 = new ArrayList<>();
 
-            Consumer<GameState> listener1 = eventsCapturedByListener1::add;
-            Consumer<GameState> listener2 = gameState -> {
+            Consumer<GameEvent> listener1 = eventsCapturedByListener1::add;
+            Consumer<GameEvent> listener2 = gameState -> {
                 throw new UnsupportedOperationException("cannot accept events!");
             };
 
@@ -207,10 +207,10 @@ class GameEventListenerTest {
                     .isNotEmpty()
                     .as("events captured by listener1 should be follow an specific order")
                     .containsExactly(
-                            new WaitingPlayers(gameId, player1),
-                            new GameReady(gameId, player1, player2),
-                            new GameRunning(gameId, player1, player2, ROCK, null),
-                            new GameOver(gameId, player1, player2, ROCK, PAPER)
+                            new GameEvent(player1,new WaitingPlayers(gameId, player1)),
+                            new GameEvent(player2,new GameReady(gameId, player1, player2)),
+                            new GameEvent(player1,new GameRunning(gameId, player1, player2, ROCK, null)),
+                            new GameEvent(player2,new GameOver(gameId, player1, player2, ROCK, PAPER))
                     );
         });
     }

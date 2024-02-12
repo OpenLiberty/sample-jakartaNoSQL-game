@@ -1,6 +1,5 @@
 package org.jakartaee.sample.server;
 
-import jakarta.annotation.PostConstruct;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.websocket.Session;
 import org.jakartaee.sample.game.Game;
@@ -18,7 +17,6 @@ import org.jakartaee.sample.server.message.Message;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.logging.Level;
 import java.util.logging.Logger;

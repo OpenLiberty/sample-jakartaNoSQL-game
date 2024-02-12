@@ -25,7 +25,7 @@ public class Game {
     private final Map<Player, String> gamesByPlayer = new HashMap<>();
     private final Map<String, Set<Player>> playersByGame = new HashMap<>();
     private final Map<String, GameState> games = new HashMap<>();
-    private final Set<Consumer<GameState>> eventListeners = new LinkedHashSet<>();
+    private final Set<Consumer<GameEvent>> eventListeners = new LinkedHashSet<>();
 
     public GameState newGame(Player player) {
         requireNonNull(player, "player is required");
@@ -37,14 +37,14 @@ public class Game {
                     try {
                         String gameId = getGameId(player);
                         registerPlayerOnTheGame(player, gameId);
-                        return publishAndReturn(updateGameState(new WaitingPlayers(gameId, player)));
+                        return publishAndReturn(player, updateGameState(new WaitingPlayers(gameId, player)));
                     } finally {
                         waitingRoom.offer(player);
                     }
                 }
                 var gameId = getGameId(playerWaiting);
                 registerPlayerOnTheGame(player, gameId);
-                return publishAndReturn(updateGameState(new GameReady(gameId, playerWaiting, player)));
+                return publishAndReturn(player, updateGameState(new GameReady(gameId, playerWaiting, player)));
             }
             return actualGameState;
         }
@@ -80,10 +80,10 @@ public class Game {
             }
             var newState = games.computeIfPresent(currentState.gameId(), (key, oldState) -> {
                 if (oldState instanceof GameReady gameReady && GamePlayers.of(gameReady.players()).isPart(player)) {
-                    return publishAndReturn(play(gameReady, player, movement));
+                    return publishAndReturn(player, play(gameReady, player, movement));
                 }
                 if (oldState instanceof GameRunning gameRunning && GamePlayers.of(gameRunning.players()).isPart(player)) {
-                    return publishAndReturn(play(gameRunning, player, movement));
+                    return publishAndReturn(player, play(gameRunning, player, movement));
                 }
                 return oldState;
             });
@@ -94,14 +94,14 @@ public class Game {
         }
     }
 
-    private GameState publishAndReturn(GameState newState) {
-        eventListeners().forEach(listener -> publish(listener, newState));
+    private GameState publishAndReturn(Object source, GameState newState) {
+        eventListeners().forEach(listener -> publish(listener, source, newState));
         return newState;
     }
 
-    private void publish(Consumer<GameState> listener, GameState newState) {
+    private void publish(Consumer<GameEvent> listener, Object source, GameState newState) {
         try {
-            listener.accept(newState);
+            listener.accept(new GameEvent(source, newState));
         } catch (RuntimeException ex) {
             LOGGER.log(Level.SEVERE, "failure to process the %s by the {%s} listener: %s".formatted(newState, listener, ex.getMessage()), ex);
         }
@@ -166,7 +166,7 @@ public class Game {
                 return gameState;
             }
             Set<Player> players = unregisterPlayers(gameState);
-            return publishAndReturn(new GameAbandoned(gameState.gameId(), players));
+            return publishAndReturn(player, new GameAbandoned(gameState.gameId(), players));
         }
     }
 
@@ -180,7 +180,7 @@ public class Game {
         }
     }
 
-    public Game addListener(Consumer<GameState> eventListener) {
+    public Game addListener(Consumer<GameEvent> eventListener) {
         if (eventListener == null) return this;
         synchronized (this) {
             this.eventListeners.add(eventListener);
@@ -188,13 +188,13 @@ public class Game {
         return this;
     }
 
-    private Set<Consumer<GameState>> eventListeners() {
+    private Set<Consumer<GameEvent>> eventListeners() {
         synchronized (this) {
             return new LinkedHashSet<>(this.eventListeners);
         }
     }
 
-    public boolean removeListener(Consumer<GameState> eventListener) {
+    public boolean removeListener(Consumer<GameEvent> eventListener) {
         if (eventListener == null) return false;
         synchronized (this) {
             return this.eventListeners.remove(eventListener);
