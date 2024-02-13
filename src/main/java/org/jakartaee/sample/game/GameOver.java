@@ -96,9 +96,9 @@ public record GameOver(String gameId,
     public static record LoserInfo(String gameId, Player player, Movement movement) {
     }
 
-    public static record PlayerInfo(String gameId, Player player, Movement movement) implements GameState {
+    public static record PlayerInfo(String gameId, Player player, Movement movement) {
     }
 
-    public static record WinnerInfo(String gameId, Player player, Movement movement) implements GameState {
+    public static record WinnerInfo(String gameId, Player player, Movement movement) {
     }
 }
