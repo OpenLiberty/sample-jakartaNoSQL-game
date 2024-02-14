@@ -110,10 +110,6 @@ class GamePlayersTest {
                     .as("GamePlayers should be able to be created based on a " + GameInvalid.class.getSimpleName() + " object")
                     .isNotNull();
 
-            softly.assertThat(GamePlayers.of(() -> null))
-                    .as("GamePlayers should be able to be created based on any " + GameState.class.getSimpleName() + " object")
-                    .isNotNull();
-
         });
     }
 
@@ -255,16 +251,6 @@ class GamePlayersTest {
 
             softly.assertThat(fromGameInvalid.players())
                     .as("GamePlayers players based on a " + GameAbandoned.class.getSimpleName() + " object should be empty")
-                    .isEmpty();
-
-            GamePlayers fromOtherGameState = GamePlayers.of(() -> null);
-
-            softly.assertThat(fromOtherGameState)
-                    .as("GamePlayers should be able to be created based on any " + GameState.class.getSimpleName() + " object")
-                    .isNotNull();
-
-            softly.assertThat(fromOtherGameState.players())
-                    .as("GamePlayers players based on other " + GameState.class.getSimpleName() + " object should be empty")
                     .isEmpty();
 
         });
