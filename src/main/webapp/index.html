@@ -152,6 +152,25 @@
 
             </div>
 
+            <div class="container disconnected">
+                <div class="row justify-content">
+                    <div class="col-12 m-0">
+                        <img src="img/disconnected.png" style="width: 100%"/>
+                    </div>
+                </div>
+
+                <div id="errorToast" class="toast align-items-center text-bg-primary border-0" role="alert"
+                     aria-live="assertive" aria-atomic="true">
+                    <div class="d-flex">
+                        <div class="toast-body" id="errorMessage">
+                        </div>
+                        <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"
+                                aria-label="Close"></button>
+                    </div>
+                </div>
+
+            </div>
+
 
             <div class="container gameRunning hide ">
                 <div class="row justify-content">
@@ -188,6 +207,7 @@
                     </label>
                 </div>
             </div>
+
         </div>
         <div class="card-body tryPanel hide">
             <div class="dropdown">
@@ -202,7 +222,7 @@
             </div>
         </div>
 
-        <div class="card-body gamePanel leavePanel">
+        <div class="card-body leavePanel hide">
             <div class="dropdown">
                 <a class="btn btn-danger btn-lg w-100 dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown"
                    aria-expanded="false">
@@ -235,15 +255,15 @@
         'use strict'
 
         const getProtocol = () => {
-            if(location.protocol === "https:"){
+            if (location.protocol === "https:") {
                 return "wss";
             }
             return "ws";
         }
 
         const getWebsocketAddress = () => {
-            let url = location.href.slice(location.protocol.length,location.href.length);
-            return `${getProtocol()}://${url.slice(0,url.lastIndexOf("/"))}`;
+            let url = location.href.slice(location.protocol.length, location.href.length);
+            return `${getProtocol()}://${url.slice(0, url.lastIndexOf("/"))}`;
         }
 
         const hideNode = node => {
@@ -346,7 +366,6 @@
 
         const gamePanel = hideOrShow(document.querySelectorAll(".gamePanel"))
 
-
         const boardMovement = new BoardMovement();
 
         const progressBar = new ProgressBar();
@@ -369,6 +388,45 @@
 
         const gameRunning = hideOrShow(document.querySelectorAll('.gameRunning'))
 
+        const disconnected = hideOrShow(document.querySelectorAll('.disconnected'))
+
+        const errorMessageElement = document.getElementById("errorMessage");
+
+        const errorModalElement = document.getElementById("errorToast");
+
+        const errorToast = bootstrap.Toast.getOrCreateInstance(errorModalElement);
+
+        const errorCodes = {
+            1000: "Normal Closure: This means that the connection was closed for expected reasons. The server and client both agree to close the connection, indicating a planned shutdown or completion of the data transfer.",
+            1001: "Going Away: The server or client is shutting down or leaving the network.",
+            1002: "Protocol Error: This could be due to a malformed frame or an unexpected sequence of frames.",
+            1003: "Unsupported Data: The endpoint received data of a type it cannot accept (e.g., text data when it is expecting binary data).",
+            1004: "Reserved: The specific meaning might be defined in the future.",
+            1005: "No Status Received: Indicates that no status code was provided even though one was expected.",
+            1006: "Abnormal Closure: The connection was closed abnormally.",
+            1007: "Invalid frame payload data.",
+            1008: "Policy Violation: The endpoint is terminating the connection because it has received a message that violates its policy.",
+            1009: "Message Too Big: The endpoint is terminating the connection because a data frame was received that is too large.",
+            1010: "Mandatory Extension: The client is terminating the connection because the server did not negotiate one or more extensions that the client finds necessary.",
+            1011: "Internal Server Error: The server is terminating the connection because it encountered an unexpected condition that prevented it from fulfilling the request.",
+            1012: "Service Restart: The server is terminating the connection due to a temporary condition, e.g., it is restarting.",
+            1013: "Try Again Later: The server is terminating the connection due to a temporary condition, suggesting the client try again at a later time.",
+            1014: "Bad Gateway: The server, acting as a gateway or proxy, received an invalid response from the upstream server.",
+            1015: "TLS Handshake: The connection was closed due to a failure in the TLS handshake."
+        };
+
+
+        const showErrorMessagesIfNeeded = (code) => {
+            if(code && code !== 1000) {
+                const message = errorCodes[code];
+                if (message) {
+                    errorMessageElement.innerHTML = message;
+                    errorToast.show();
+                    return true;
+                }
+            }
+            return false;
+        }
 
         const hidePanels = () => {
             gamePanel.hide()
@@ -380,6 +438,7 @@
             leavePanel.hide();
             tryPanel.hide();
             tied.hide();
+            disconnected.hide();
         }
 
 
@@ -392,7 +451,7 @@
         const updateOpponentImages = (movement) => {
             document.querySelectorAll('.opponentImages')
                 .forEach(image => {
-                    image.src = `img/${''===movement.trim()?'NONE':movement}.png`;
+                    image.src = `img/${'' === movement.trim() ? 'NONE' : movement}.png`;
                 });
         }
 
@@ -428,6 +487,7 @@
                     socket.close();
                 }
                 connect();
+                askedToExit = false;
             }
             form.classList.add('was-validated')
         }, false);
@@ -435,12 +495,13 @@
 
         let connected = false;
         let socket;
+        let askedToExit = false;
 
         document.querySelectorAll(".leaveBtn")
             .forEach(btn => {
                 btn.addEventListener('click', () => {
+                    askedToExit = true;
                     socket.close();
-
                     waitingPlayers.hide();
                     gameRunning.hide();
                     board.hide();
@@ -451,6 +512,8 @@
                     leavePanel.hide();
                     tryPanel.hide();
                     gamePanel.hide();
+                    disconnected.hide();
+
                     initialForm.show();
                 }, false)
             });
@@ -458,7 +521,10 @@
         document.querySelectorAll(".btnTryAgain")
             .forEach(btn => {
                 btn.addEventListener('click', () => {
-                    socket.close();
+                    askedToExit = true;
+                    if (connected) {
+                        socket.close();
+                    }
                     waitingPlayers.hide();
                     gameRunning.hide();
                     board.hide();
@@ -469,6 +535,7 @@
                     leavePanel.hide();
                     tryPanel.hide();
                     gamePanel.hide();
+                    disconnected.hide();
                     initialForm.show();
                 }, false);
             })
@@ -484,16 +551,26 @@
                     gamePanel.show();
                     board.show();
                     boardMovement.enable();
-
+                    askedToExit = false;
                 };
-                socket.onclose = function () {
+                socket.onclose = function (evt) {
                     connected = false;
-                    console.log("Closed web socket");
+                    console.log({
+                        code: evt.code,
+                        wasClean: evt.wasClean,
+                        reason: evt.reason
+                    });
+                    if (showErrorMessagesIfNeeded(evt.code)) {
+                        hidePanels();
+                        gamePanel.show();
+                        disconnected.show();
+                        tryPanel.show();
+                        showErrorMessagesIfNeeded();
+                    }
                 };
-
-                const sendMessage = (message)=>{
+                const sendMessage = (message) => {
                     let data = JSON.stringify(message);
-                    if(connected) {
+                    if (connected) {
                         console.log("Sending: " + data);
                         socket.send(data)
                     }
@@ -515,12 +592,14 @@
                         hidePanels();
                         gamePanel.show();
                         board.show();
-                        waitingPlayers.show()
+                        waitingPlayers.show();
+                        leavePanel.show();
                         boardMovement.enable();
                     }
                     if ("GAME_OVER_ABANDONED" === msg.type) {
                         updateOpponentName(msg.data.opponentName)
-                        updateOpponentImages('NONE')
+                        updateOpponentImages('whereistheopponent')
+                        askedToExit = true;
                         state.gameId = msg.data.gameId;
                         waitingPlayers.hide();
                         gameRunning.hide();
@@ -583,6 +662,7 @@
                         updateOpponentImages('NONE')
                         state.gameId = msg.data.gameId
                         waitingPlayers.hide()
+                        leavePanel.show();
                         gameRunning.show();
                         progressBar.reset();
                         const interval = setInterval(() => {
@@ -591,7 +671,7 @@
                         const timeout = setTimeout(() => {
                             clearInterval(interval);
                             boardMovement.disable();
-                            const n={
+                            const n = {
                                 type: "PLAY_GAME",
                                 data: {
                                     gameId: state.gameId,
