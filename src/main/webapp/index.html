@@ -487,7 +487,6 @@
                     socket.close();
                 }
                 connect();
-                askedToExit = false;
             }
             form.classList.add('was-validated')
         }, false);
@@ -495,12 +494,10 @@
 
         let connected = false;
         let socket;
-        let askedToExit = false;
 
         document.querySelectorAll(".leaveBtn")
             .forEach(btn => {
                 btn.addEventListener('click', () => {
-                    askedToExit = true;
                     socket.close();
                     waitingPlayers.hide();
                     gameRunning.hide();
@@ -521,7 +518,6 @@
         document.querySelectorAll(".btnTryAgain")
             .forEach(btn => {
                 btn.addEventListener('click', () => {
-                    askedToExit = true;
                     if (connected) {
                         socket.close();
                     }
@@ -551,14 +547,14 @@
                     gamePanel.show();
                     board.show();
                     boardMovement.enable();
-                    askedToExit = false;
                 };
                 socket.onclose = function (evt) {
                     connected = false;
-                    console.log({
+                    console.error({
                         code: evt.code,
                         wasClean: evt.wasClean,
-                        reason: evt.reason
+                        reason: evt.reason,
+                        detail: errorCodes[evt.code]
                     });
                     if (showErrorMessagesIfNeeded(evt.code)) {
                         hidePanels();
@@ -599,7 +595,6 @@
                     if ("GAME_OVER_ABANDONED" === msg.type) {
                         updateOpponentName(msg.data.opponentName)
                         updateOpponentImages('whereistheopponent')
-                        askedToExit = true;
                         state.gameId = msg.data.gameId;
                         waitingPlayers.hide();
                         gameRunning.hide();
