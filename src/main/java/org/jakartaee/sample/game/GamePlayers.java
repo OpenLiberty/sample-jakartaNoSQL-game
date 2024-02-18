@@ -35,21 +35,21 @@ public record GamePlayers(Set<Player> players) {
     }
 
     public static GamePlayers of(GameState gameState) {
-        if (gameState instanceof WaitingPlayers waitingPlayers) {
-            return GamePlayers.of(Set.of(waitingPlayers.player()));
-        }
-        if (gameState instanceof GameReady gameReady) {
-            return GamePlayers.of(gameReady.players());
-        }
-        if (gameState instanceof GameRunning gameRunning) {
-            return GamePlayers.of(gameRunning.players());
-        }
-        if (gameState instanceof GameOver gameOver) {
-            return GamePlayers.of(gameOver.players());
-        }
-        if (gameState instanceof GameAbandoned gameAbandoned) {
-            return GamePlayers.of(gameAbandoned.players());
-        }
-        return GamePlayers.of(Set.of());
+
+        return switch (gameState) {
+
+            case WaitingPlayers waitingPlayers -> GamePlayers.of(Set.of(waitingPlayers.player()));
+
+            case GameReady gameReady -> GamePlayers.of(gameReady.players());
+
+            case GameRunning gameRunning -> GamePlayers.of(gameRunning.players());
+
+            case GameOver gameOver -> GamePlayers.of(gameOver.players());
+
+            case GameAbandoned gameAbandoned -> GamePlayers.of(gameAbandoned.players());
+
+            default -> GamePlayers.of();
+
+        };
     }
 }

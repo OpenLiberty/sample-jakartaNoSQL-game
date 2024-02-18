@@ -78,14 +78,12 @@ public class Game {
             if (currentState instanceof GameInvalid) {
                 return currentState;
             }
-            var newState = games.computeIfPresent(currentState.gameId(), (key, oldState) -> {
-                if (oldState instanceof GameReady gameReady && GamePlayers.of(gameReady.players()).isPart(player)) {
-                    return publishAndReturn(player, play(gameReady, player, movement));
-                }
-                if (oldState instanceof GameRunning gameRunning && GamePlayers.of(gameRunning.players()).isPart(player)) {
-                    return publishAndReturn(player, play(gameRunning, player, movement));
-                }
-                return oldState;
+            var newState = games.computeIfPresent(currentState.gameId(), (key, oldState) -> switch (oldState) {
+                case GameReady gameReady when GamePlayers.of(gameReady.players()).isPart(player) ->
+                        publishAndReturn(player, play(gameReady, player, movement));
+                case GameRunning gameRunning when GamePlayers.of(gameRunning.players()).isPart(player) ->
+                        publishAndReturn(player, play(gameRunning, player, movement));
+                default -> oldState;
             });
             if (newState instanceof GameOver gameOver && GamePlayers.of(gameOver.players()).isPart(player)) {
                 unregisterPlayers(gameOver);
