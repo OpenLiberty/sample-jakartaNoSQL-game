@@ -1,4 +1,4 @@
-../target/
+target/
 pom.xml.tag
 pom.xml.releaseBackup
 pom.xml.versionsBackup
@@ -6,12 +6,13 @@ pom.xml.next
 release.properties
 dependency-reduced-pom.xml
 buildNumber.properties
-start/.mvn/timing.properties
+.mvn/timing.properties
 # https://github.com/takari/maven-wrapper#usage-without-binary-jar
-start/.mvn/wrapper/maven-wrapper.jar
+.mvn/wrapper/maven-wrapper.jar
 
-# Created by https://www.toptal.com/developers/gitignore/api/intellij+all,intellij+iml,eclipse,maven,netbeans,visualstudiocode
-# Edit at https://www.toptal.com/developers/gitignore?templates=intellij+all,intellij+iml,eclipse,maven,netbeans,visualstudiocode
+
+# Created by https://www.toptal.com/developers/gitignore/api/intellij+all,eclipse,maven,netbeans,visualstudiocode
+# Edit at https://www.toptal.com/developers/gitignore?templates=intellij+all,eclipse,maven,netbeans,visualstudiocode
 
 ### Eclipse ###
 .metadata
@@ -167,63 +168,6 @@ fabric.properties
 !.idea/codeStyles
 !.idea/runConfigurations
 
-### Intellij+iml ###
-# Covers JetBrains IDEs: IntelliJ, RubyMine, PhpStorm, AppCode, PyCharm, CLion, Android Studio, WebStorm and Rider
-# Reference: https://intellij-support.jetbrains.com/hc/en-us/articles/206544839
-
-# User-specific stuff
-
-# AWS User-specific
-
-# Generated files
-
-# Sensitive or high-churn files
-
-# Gradle
-
-# Gradle and Maven with auto-import
-# When using Gradle or Maven with auto-import, you should exclude module files,
-# since they will be recreated, and may cause churn.  Uncomment if using
-# auto-import.
-# .idea/artifacts
-# .idea/compiler.xml
-# .idea/jarRepositories.xml
-# .idea/modules.xml
-# .idea/*.iml
-# .idea/modules
-# *.iml
-# *.ipr
-
-# CMake
-
-# Mongo Explorer plugin
-
-# File-based project format
-
-# IntelliJ
-
-# mpeltonen/sbt-idea plugin
-
-# JIRA plugin
-
-# Cursive Clojure plugin
-
-# SonarLint plugin
-
-# Crashlytics plugin (for Android Studio and IntelliJ)
-
-# Editor-based Rest Client
-
-# Android studio 3.1+ serialized cache file
-
-### Intellij+iml Patch ###
-# Reason: https://github.com/joeblau/gitignore.io/issues/186#issuecomment-249601023
-
-*.iml
-modules.xml
-.idea/misc.xml
-*.ipr
-
 ### Maven ###
 target/
 pom.xml.tag
@@ -272,4 +216,4 @@ nbdist/
 .history
 .ionide
 
-# End of https://www.toptal.com/developers/gitignore/api/intellij+all,intellij+iml,eclipse,maven,netbeans,visualstudiocode
+# End of https://www.toptal.com/developers/gitignore/api/intellij+all,eclipse,maven,netbeans,visualstudiocode
