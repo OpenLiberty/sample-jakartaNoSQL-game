@@ -51,11 +51,14 @@ public class GameSessions {
 
     private final Game game = new Game();
 
-    private Event<GameEvent> event;
+    private Event<GameEvent> gameEventPublisher;
+    private Event<GameState> gameStatePublisher;
 
     @Inject
-    public GameSessions(Event<GameEvent> event) {
-        this.event = event;
+    public GameSessions(Event<GameEvent> gameEventPublisher,
+                        Event<GameState> gameStatePublisher) {
+        this.gameEventPublisher = gameEventPublisher;
+        this.gameStatePublisher = gameStatePublisher;
     }
 
     /**
@@ -68,7 +71,8 @@ public class GameSessions {
     @PostConstruct
     void postConstruct() {
         game.addListener(this::onGameEvent)
-                .addListener(event::fire);
+                .addListener(gameEventPublisher::fire)
+                .addListener(event -> gameStatePublisher.fire(event.gameState()));
     }
 
     private Optional<Player> getPlayerBySession(Session session) {
@@ -129,7 +133,7 @@ public class GameSessions {
         if (gameState instanceof GameInvalid gameInvalid
                 && event.source() instanceof Player player) {
             getSessionById(player.id())
-                    .ifPresent(session -> send(session,gameInvalid));
+                    .ifPresent(session -> send(session, gameInvalid));
         }
 
         if (gameState instanceof WaitingPlayers waitingPlayers) {
