@@ -1,7 +1,5 @@
 package org.jakartaee.sample.game;
 
-import org.assertj.core.api.SoftAssertions;
-import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 import java.util.UUID;
@@ -134,7 +132,7 @@ class GameOverTest {
                     .as("a tied game's winner info should be not present")
                     .isPresent()
                     .as("the game's winner info should be player1 and PAPER")
-                    .hasValue(new GameOver.WinnerInfo(gameOver.gameId(), player1, PAPER));
+                    .hasValue(new GameOver.PlayerInfo(gameOver.gameId(), player1, PAPER));
 
             softly.assertThat(gameOver.loser())
                     .as("a tied game's loser should be present")
@@ -152,7 +150,7 @@ class GameOverTest {
                     .as("a tied game's loser info should be present")
                     .isPresent()
                     .as("the game's loser info should be player2 and ROCK")
-                    .hasValue(new GameOver.LoserInfo(gameOver.gameId(), player2, ROCK));
+                    .hasValue(new GameOver.PlayerInfo(gameOver.gameId(), player2, ROCK));
 
         });
     }

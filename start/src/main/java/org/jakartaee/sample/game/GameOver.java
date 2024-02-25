@@ -71,18 +71,18 @@ public record GameOver(String gameId,
                 .or(() -> Optional.of(playerAMovement));
     }
 
-    public Optional<LoserInfo> loserInfo() {
+    public Optional<PlayerInfo> loserInfo() {
         if (isTied()) {
             return Optional.empty();
         }
-        return Optional.of(new LoserInfo(this.gameId, this.loser().orElse(null), this.loserMovement().orElse(null)));
+        return Optional.of(new PlayerInfo(this.gameId, this.loser().orElse(null), this.loserMovement().orElse(null)));
     }
 
-    public Optional<WinnerInfo> winnerInfo() {
+    public Optional<PlayerInfo> winnerInfo() {
         if (isTied()) {
             return Optional.empty();
         }
-        return Optional.of(new WinnerInfo(this.gameId, this.winner().orElse(null), this.winnerMovement().orElse(null)));
+        return Optional.of(new PlayerInfo(this.gameId, this.winner().orElse(null), this.winnerMovement().orElse(null)));
     }
 
     public PlayerInfo playerAInfo() {
@@ -93,12 +93,5 @@ public record GameOver(String gameId,
         return new PlayerInfo(this.gameId, this.playerB, this.playerBMovement);
     }
 
-    public static record LoserInfo(String gameId, Player player, Movement movement) {
-    }
-
-    public static record PlayerInfo(String gameId, Player player, Movement movement) {
-    }
-
-    public static record WinnerInfo(String gameId, Player player, Movement movement) {
-    }
+    public static record PlayerInfo(String gameId, Player player, Movement movement) { }
 }
