@@ -1,4 +1,4 @@
-package org.jakartaee.sample.server.message;
+package org.jakartaee.sample.websocket.message;
 
 public record MessageSetter(Message message) {
 

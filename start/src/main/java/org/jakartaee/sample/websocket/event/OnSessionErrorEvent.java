@@ -1,4 +1,4 @@
-package org.jakartaee.sample.server.event;
+package org.jakartaee.sample.websocket.event;
 
 import jakarta.websocket.Session;
 

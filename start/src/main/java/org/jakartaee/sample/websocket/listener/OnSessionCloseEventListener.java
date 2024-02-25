@@ -1,10 +1,10 @@
-package org.jakartaee.sample.server.listener;
+package org.jakartaee.sample.websocket.listener;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.event.Observes;
 import jakarta.inject.Inject;
-import org.jakartaee.sample.server.GameSessions;
-import org.jakartaee.sample.server.event.OnSessionCloseEvent;
+import org.jakartaee.sample.websocket.GameSessions;
+import org.jakartaee.sample.websocket.event.OnSessionCloseEvent;
 
 @ApplicationScoped
 public class OnSessionCloseEventListener {

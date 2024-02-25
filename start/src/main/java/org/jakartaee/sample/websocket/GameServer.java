@@ -1,4 +1,4 @@
-package org.jakartaee.sample.server;
+package org.jakartaee.sample.websocket;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.event.Event;
@@ -10,11 +10,11 @@ import jakarta.websocket.OnOpen;
 import jakarta.websocket.Session;
 import jakarta.websocket.server.PathParam;
 import jakarta.websocket.server.ServerEndpoint;
-import org.jakartaee.sample.server.event.GameServerEvent;
-import org.jakartaee.sample.server.event.OnSessionCloseEvent;
-import org.jakartaee.sample.server.event.OnSessionErrorEvent;
-import org.jakartaee.sample.server.event.OnSessionMessageEvent;
-import org.jakartaee.sample.server.event.OnSessionOpenEvent;
+import org.jakartaee.sample.websocket.event.GameServerEvent;
+import org.jakartaee.sample.websocket.event.OnSessionCloseEvent;
+import org.jakartaee.sample.websocket.event.OnSessionErrorEvent;
+import org.jakartaee.sample.websocket.event.OnSessionMessageEvent;
+import org.jakartaee.sample.websocket.event.OnSessionOpenEvent;
 
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;

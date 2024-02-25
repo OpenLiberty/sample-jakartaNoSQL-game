@@ -1,4 +1,4 @@
-package org.jakartaee.sample.server;
+package org.jakartaee.sample.websocket;
 
 import jakarta.annotation.PostConstruct;
 import jakarta.enterprise.context.ApplicationScoped;
@@ -17,7 +17,7 @@ import org.jakartaee.sample.game.GameState;
 import org.jakartaee.sample.game.Movement;
 import org.jakartaee.sample.game.Player;
 import org.jakartaee.sample.game.WaitingPlayers;
-import org.jakartaee.sample.server.message.Message;
+import org.jakartaee.sample.websocket.message.Message;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -26,19 +26,19 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Stream;
 
-import static org.jakartaee.sample.server.message.MessageField.gameId;
-import static org.jakartaee.sample.server.message.MessageField.movement;
-import static org.jakartaee.sample.server.message.MessageField.opponentMovement;
-import static org.jakartaee.sample.server.message.MessageField.opponentName;
-import static org.jakartaee.sample.server.message.MessageType.CONNECTED;
-import static org.jakartaee.sample.server.message.MessageType.GAME_INVALID;
-import static org.jakartaee.sample.server.message.MessageType.GAME_OVER_ABANDONED;
-import static org.jakartaee.sample.server.message.MessageType.GAME_OVER_DRAW;
-import static org.jakartaee.sample.server.message.MessageType.GAME_OVER_YOU_LOSE;
-import static org.jakartaee.sample.server.message.MessageType.GAME_OVER_YOU_WIN;
-import static org.jakartaee.sample.server.message.MessageType.GAME_READY;
-import static org.jakartaee.sample.server.message.MessageType.GAME_RUNNING;
-import static org.jakartaee.sample.server.message.MessageType.WAITING_PLAYERS;
+import static org.jakartaee.sample.websocket.message.MessageField.gameId;
+import static org.jakartaee.sample.websocket.message.MessageField.movement;
+import static org.jakartaee.sample.websocket.message.MessageField.opponentMovement;
+import static org.jakartaee.sample.websocket.message.MessageField.opponentName;
+import static org.jakartaee.sample.websocket.message.MessageType.CONNECTED;
+import static org.jakartaee.sample.websocket.message.MessageType.GAME_INVALID;
+import static org.jakartaee.sample.websocket.message.MessageType.GAME_OVER_ABANDONED;
+import static org.jakartaee.sample.websocket.message.MessageType.GAME_OVER_DRAW;
+import static org.jakartaee.sample.websocket.message.MessageType.GAME_OVER_YOU_LOSE;
+import static org.jakartaee.sample.websocket.message.MessageType.GAME_OVER_YOU_WIN;
+import static org.jakartaee.sample.websocket.message.MessageType.GAME_READY;
+import static org.jakartaee.sample.websocket.message.MessageType.GAME_RUNNING;
+import static org.jakartaee.sample.websocket.message.MessageType.WAITING_PLAYERS;
 
 @ApplicationScoped
 public class GameSessions {

@@ -1,4 +1,4 @@
-package org.jakartaee.sample.server.message;
+package org.jakartaee.sample.websocket.message;
 
 import jakarta.json.bind.Jsonb;
 import jakarta.json.bind.JsonbBuilder;
