@@ -2,6 +2,8 @@ package org.jakartaee.sample.server;
 
 import jakarta.annotation.PostConstruct;
 import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.event.Event;
+import jakarta.inject.Inject;
 import jakarta.websocket.Session;
 import org.jakartaee.sample.game.Game;
 import org.jakartaee.sample.game.GameAbandoned;
@@ -44,12 +46,29 @@ public class GameSessions {
     private static final Logger LOG = Logger.getLogger(GameSessions.class.getName());
 
     private final Map<String, Session> sessionsById = new HashMap<>();
+
     private final Map<String, Player> playersBySessionId = new HashMap<>();
+
     private final Game game = new Game();
+
+    private Event<GameEvent> event;
+
+    @Inject
+    public GameSessions(Event<GameEvent> event) {
+        this.event = event;
+    }
+
+    /**
+     * do not use it, it is required by CDI
+     */
+    @Deprecated
+    public GameSessions() {
+    }
 
     @PostConstruct
     void postConstruct() {
-        game.addListener(this::onGameEvent);
+        game.addListener(this::onGameEvent)
+                .addListener(event::fire);
     }
 
     private Optional<Player> getPlayerBySession(Session session) {
