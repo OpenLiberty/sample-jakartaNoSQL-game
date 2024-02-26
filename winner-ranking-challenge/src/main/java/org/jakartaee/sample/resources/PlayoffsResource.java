@@ -6,6 +6,8 @@ import jakarta.ws.rs.GET;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
+import org.eclipse.jnosql.mapping.Database;
+import org.eclipse.jnosql.mapping.DatabaseType;
 import org.jakartaee.sample.model.Playoffs;
 import org.jakartaee.sample.model.Ranking;
 
@@ -15,11 +17,12 @@ import org.jakartaee.sample.model.Ranking;
 public class PlayoffsResource {
 
     @Inject
+    @Database(DatabaseType.DOCUMENT)
     Playoffs playoffs;
 
     @GET
     @Path("/ranking")
-    public Ranking getRanking(){
+    public Ranking getRanking() {
         return playoffs.winnerRanking();
     }
 }
