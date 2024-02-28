@@ -327,7 +327,7 @@
         const btnradios = document.getElementsByName("btnradio")
 
         const updateMyImages = (movement) => {
-            state.movement = movement;
+            state.MOVEMENT = movement;
             document.querySelectorAll('.myImage')
                 .forEach(image => {
                     image.src = `img/${movement}.png`;
@@ -459,15 +459,10 @@
         class State {
 
             constructor() {
-                this.username = '';
-                this.victory = 0;
-                this.defeats = 0;
-                this.abandoned = 0;
-                this.ties = 0;
-                this.games = 0;
-                this.movement = 'ROCK';
-                this.opponentName = '';
-                this.opponentMovement = '';
+                this.USERNAME = '';
+                this.MOVEMENT = 'ROCK';
+                this.OPPONENT_NAME = '';
+                this.OPPONENT_MOVEMENT = '';
             }
 
         }
@@ -482,7 +477,7 @@
             if (form.checkValidity()) {
                 initialForm.hide();
                 hidePanels();
-                state.username = input.value;
+                state.USERNAME = input.value;
                 if (connected) {
                     socket.close();
                 }
@@ -538,7 +533,7 @@
 
         const connect = () => {
             if (!connected) {
-                const username = state.username;
+                const username = state.USERNAME;
                 const wsURL = `${getWebsocketAddress()}/jnopo/${username}`;
                 socket = new WebSocket(wsURL);
                 socket.onopen = function () {
@@ -550,19 +545,22 @@
                 };
                 socket.onclose = function (evt) {
                     connected = false;
-                    console.error({
-                        code: evt.code,
-                        wasClean: evt.wasClean,
-                        reason: evt.reason,
-                        detail: errorCodes[evt.code]
-                    });
+                    let logger = console.log;
                     if (showErrorMessagesIfNeeded(evt.code)) {
+                        logger = console.error;
                         hidePanels();
                         gamePanel.show();
                         disconnected.show();
                         tryPanel.show();
                         showErrorMessagesIfNeeded();
                     }
+
+                    logger({
+                        code: evt.code,
+                        wasClean: evt.wasClean,
+                        reason: evt.reason,
+                        detail: errorCodes[evt.code]
+                    });
                 };
                 const sendMessage = (message) => {
                     let data = JSON.stringify(message);
@@ -582,7 +580,7 @@
                         })
                     }
                     if ("WAITING_PLAYERS" === msg.type) {
-                        state.gameId = msg.data.gameId;
+                        state.GAME_ID = msg.data.GAME_ID;
                         updateOpponentName('')
                         updateOpponentImages('NONE')
                         hidePanels();
@@ -593,9 +591,9 @@
                         boardMovement.enable();
                     }
                     if ("GAME_OVER_ABANDONED" === msg.type) {
-                        updateOpponentName(msg.data.opponentName)
+                        updateOpponentName(msg.data.OPPONENT_NAME)
                         updateOpponentImages('whereistheopponent')
-                        state.gameId = msg.data.gameId;
+                        state.GAME_ID = msg.data.GAME_ID;
                         waitingPlayers.hide();
                         gameRunning.hide();
                         board.hide();
@@ -608,9 +606,9 @@
                         socket.close()
                     }
                     if ("GAME_OVER_YOU_LOSE" === msg.type) {
-                        updateOpponentName(msg.data.opponentName)
-                        updateOpponentImages(msg.data.opponentMovement)
-                        state.gameId = msg.data.gameId;
+                        updateOpponentName(msg.data.OPPONENT_NAME)
+                        updateOpponentImages(msg.data.OPPONENT_MOVEMENT)
+                        state.GAME_ID = msg.data.GAME_ID;
                         waitingPlayers.hide();
                         gameRunning.hide();
                         board.hide();
@@ -623,9 +621,9 @@
                         socket.close()
                     }
                     if ("GAME_OVER_YOU_WIN" === msg.type) {
-                        updateOpponentName(msg.data.opponentName)
-                        updateOpponentImages(msg.data.opponentMovement)
-                        state.gameId = msg.data.gameId;
+                        updateOpponentName(msg.data.OPPONENT_NAME)
+                        updateOpponentImages(msg.data.OPPONENT_MOVEMENT)
+                        state.GAME_ID = msg.data.GAME_ID;
                         waitingPlayers.hide();
                         gameRunning.hide();
                         board.hide();
@@ -638,9 +636,9 @@
                         socket.close()
                     }
                     if ("GAME_OVER_DRAW" === msg.type) {
-                        updateOpponentName(msg.data.opponentName)
-                        updateOpponentImages(msg.data.opponentMovement)
-                        state.gameId = msg.data.gameId;
+                        updateOpponentName(msg.data.OPPONENT_NAME)
+                        updateOpponentImages(msg.data.OPPONENT_MOVEMENT)
+                        state.GAME_ID = msg.data.GAME_ID;
                         waitingPlayers.hide();
                         gameRunning.hide();
                         board.hide();
@@ -653,9 +651,9 @@
                         socket.close()
                     }
                     if ("GAME_READY" === msg.type) {
-                        updateOpponentName(msg.data.opponentName)
+                        updateOpponentName(msg.data.OPPONENT_NAME)
                         updateOpponentImages('NONE')
-                        state.gameId = msg.data.gameId
+                        state.GAME_ID = msg.data.GAME_ID
                         waitingPlayers.hide()
                         leavePanel.show();
                         gameRunning.show();
@@ -669,8 +667,8 @@
                             const n = {
                                 type: "PLAY_GAME",
                                 data: {
-                                    gameId: state.gameId,
-                                    movement: state.movement
+                                    GAME_ID: state.GAME_ID,
+                                    MOVEMENT: state.MOVEMENT
                                 }
                             };
                             sendMessage(n);

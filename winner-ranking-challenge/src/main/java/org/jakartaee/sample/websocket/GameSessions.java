@@ -26,10 +26,10 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Stream;
 
-import static org.jakartaee.sample.websocket.message.MessageField.gameId;
-import static org.jakartaee.sample.websocket.message.MessageField.movement;
-import static org.jakartaee.sample.websocket.message.MessageField.opponentMovement;
-import static org.jakartaee.sample.websocket.message.MessageField.opponentName;
+import static org.jakartaee.sample.websocket.message.MessageField.GAME_ID;
+import static org.jakartaee.sample.websocket.message.MessageField.MOVEMENT;
+import static org.jakartaee.sample.websocket.message.MessageField.OPPONENT_MOVEMENT;
+import static org.jakartaee.sample.websocket.message.MessageField.OPPONENT_NAME;
 import static org.jakartaee.sample.websocket.message.MessageType.CONNECTED;
 import static org.jakartaee.sample.websocket.message.MessageType.GAME_INVALID;
 import static org.jakartaee.sample.websocket.message.MessageType.GAME_OVER_ABANDONED;
@@ -121,7 +121,7 @@ public class GameSessions {
 
     public void playerWantsToPlay(Message message, Session session) {
         getPlayerBySession(session)
-                .ifPresent(player -> movement.get(message)
+                .ifPresent(player -> MOVEMENT.get(message)
                         .map(Movement::valueOf)
                         .ifPresent(playerMovement -> game.playGame(player, playerMovement)));
     }
@@ -181,7 +181,7 @@ public class GameSessions {
     }
 
     private void send(Session session, WaitingPlayers waitingPlayers) {
-        Message message = WAITING_PLAYERS.build(m -> m.set(gameId, waitingPlayers.gameId()));
+        Message message = WAITING_PLAYERS.build(m -> m.set(GAME_ID, waitingPlayers.gameId()));
         send(session, message);
     }
 
@@ -192,8 +192,8 @@ public class GameSessions {
                     gamePlayers.getOpponent(player)
                             .ifPresent(opponent -> {
                                 Message message = GAME_READY
-                                        .build(s -> s.set(gameId, gameReady.gameId())
-                                                .set(opponentName, opponent.name()));
+                                        .build(s -> s.set(GAME_ID, gameReady.gameId())
+                                                .set(OPPONENT_NAME, opponent.name()));
                                 send(session, message);
                             });
                 });
@@ -206,8 +206,8 @@ public class GameSessions {
                     gamePlayers.getOpponent(player)
                             .ifPresent(opponent -> {
                                 Message message = GAME_RUNNING
-                                        .build(s -> s.set(gameId, gameRunning.gameId())
-                                                .set(opponentName, opponent.name()));
+                                        .build(s -> s.set(GAME_ID, gameRunning.gameId())
+                                                .set(OPPONENT_NAME, opponent.name()));
                                 send(session, message);
                             });
                 });
@@ -217,34 +217,34 @@ public class GameSessions {
         var isPlayerA = gameOver.playerA().id().equals(session.getId());
         var isWinner = session.getId().equals(gameOver.winner().orElseThrow().id());
         send(session, (isWinner ? GAME_OVER_YOU_WIN : GAME_OVER_YOU_LOSE)
-                .build(s -> s.set(gameId, gameOver.gameId())
-                        .set(opponentName, (isPlayerA ? gameOver.playerB() : gameOver.playerA()).name())
-                        .set(opponentMovement, (isPlayerA ? gameOver.playerBMovement() : gameOver.playerAMovement()).name())));
+                .build(s -> s.set(GAME_ID, gameOver.gameId())
+                        .set(OPPONENT_NAME, (isPlayerA ? gameOver.playerB() : gameOver.playerA()).name())
+                        .set(OPPONENT_MOVEMENT, (isPlayerA ? gameOver.playerBMovement() : gameOver.playerAMovement()).name())));
     }
 
     private void sendTiedGame(GameOver gameOver) {
         getSessionById(gameOver.playerA().id())
                 .ifPresent(sessionPlayerA ->
-                        send(sessionPlayerA, GAME_OVER_DRAW.build(s -> s.set(gameId, gameOver.gameId())
-                                .set(opponentName, gameOver.playerB().name())
-                                .set(opponentMovement, gameOver.playerBMovement().name()))));
+                        send(sessionPlayerA, GAME_OVER_DRAW.build(s -> s.set(GAME_ID, gameOver.gameId())
+                                .set(OPPONENT_NAME, gameOver.playerB().name())
+                                .set(OPPONENT_MOVEMENT, gameOver.playerBMovement().name()))));
 
         getSessionById(gameOver.playerB().id())
                 .ifPresent(sessionPlayerB ->
-                        send(sessionPlayerB, GAME_OVER_DRAW.build(s -> s.set(gameId, gameOver.gameId())
-                                .set(opponentName, gameOver.playerA().name())
-                                .set(opponentMovement, gameOver.playerAMovement().name()))));
+                        send(sessionPlayerB, GAME_OVER_DRAW.build(s -> s.set(GAME_ID, gameOver.gameId())
+                                .set(OPPONENT_NAME, gameOver.playerA().name())
+                                .set(OPPONENT_MOVEMENT, gameOver.playerAMovement().name()))));
     }
 
     private void send(Session session, Player whoAbandoned, GameAbandoned gameAbandoned) {
         Message message = GAME_OVER_ABANDONED.build(m ->
-                m.set(gameId, gameAbandoned.gameId())
-                        .set(opponentName, whoAbandoned.name()));
+                m.set(GAME_ID, gameAbandoned.gameId())
+                        .set(OPPONENT_NAME, whoAbandoned.name()));
         send(session, message);
     }
 
     private void send(Session session, GameInvalid gameInvalid) {
-        send(session, GAME_INVALID.build(s -> s.set(gameId, gameInvalid.gameId())));
+        send(session, GAME_INVALID.build(s -> s.set(GAME_ID, gameInvalid.gameId())));
     }
 
     private void send(Session session, Message message) {

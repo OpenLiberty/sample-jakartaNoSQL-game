@@ -4,11 +4,11 @@ import java.util.Optional;
 
 public enum MessageField {
 
-    error,
-    gameId,
-    opponentName,
-    opponentMovement,
-    movement;
+    ERROR,
+    GAME_ID,
+    OPPONENT_NAME,
+    OPPONENT_MOVEMENT,
+    MOVEMENT;
 
     public void set(Message message, String value) {
         message.data().put(this, value);
