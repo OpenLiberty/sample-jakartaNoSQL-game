@@ -1,0 +1,17 @@
+
+[source, bash]
+----
+curl 'https://start.openliberty.io/api/start?a=jakarta-nosql-game&b=maven&e=10.0&g=org.jakartaee.sample&j=17&m=6.1' \
+-H 'authority: start.openliberty.io' \
+-H 'accept: */*' \
+-H 'accept-language: en-US,en;q=0.9,de-DE;q=0.8,de;q=0.7,pt;q=0.6' \
+-H 'origin: https://openliberty.io' \
+-H 'sec-ch-ua: "Not A(Brand";v="99", "Google Chrome";v="121", "Chromium";v="121"' \
+-H 'sec-ch-ua-mobile: ?0' \
+-H 'sec-ch-ua-platform: "macOS"' \
+-H 'sec-fetch-dest: empty' \
+-H 'sec-fetch-mode: cors' \
+-H 'sec-fetch-site: same-site' \
+-H 'user-agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36' \
+--compressed --output jakarta-nosql-game.zip
+----
